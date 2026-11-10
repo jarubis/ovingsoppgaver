@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IN2120 - Øvingsoppgaver i eksamensstil</title>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#12141a;--panel:#1a1e27;--p2:#20242f;--bd:#2b3140;--tx:#ebe6d9;--dim:#8d95a6;--gold:#e8b23d;--gr:#5fae7e;--rd:#d6545f;--on:#1a1508;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f6f3ea;--panel:#fff;--p2:#efeadb;--bd:#d8d2bf;--tx:#23201a;--dim:#6b6858;--gold:#b07d10;--gr:#2f7d52;--rd:#b8333f;--on:#fff}}
+*{box-sizing:border-box}html{scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Spectral',Georgia,serif;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:40px 18px 100px}
+h1{font-size:1.9rem;margin:0 0 8px}.sub{color:var(--dim);margin:0 0 24px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.score{font-family:'IBM Plex Mono',monospace;font-size:.9rem;margin-right:auto}.score b{color:var(--gold)}
+.chip,button.sm{font-family:'IBM Plex Mono',monospace;font-size:.72rem;background:var(--p2);color:var(--dim);border:1px solid var(--bd);border-radius:99px;padding:5px 11px;cursor:pointer}
+.chip.on{color:var(--on);background:var(--gold);border-color:var(--gold)}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:6px;padding:20px;margin:18px 0}
+.card.done{border-color:var(--gold)}
+.meta{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--dim);margin-bottom:8px}
+.q{margin:0 0 14px;font-weight:600;white-space:pre-line}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--bd);font-size:.95rem}
+.row:first-of-type{border-top:0}
+select,input[type=text],textarea{background:var(--p2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:.85rem;max-width:100%}
+input[type=text],textarea{width:100%}textarea{min-height:90px;resize:vertical}
+select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--gold)}
+label.o{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--bd);border-radius:4px;margin:6px 0;cursor:pointer;font-size:.95rem}
+label.o:hover{border-color:var(--gold)}
+.ok{border-color:var(--gr)!important;background:color-mix(in srgb,var(--gr) 14%,transparent)}
+.no{border-color:var(--rd)!important;background:color-mix(in srgb,var(--rd) 14%,transparent)}
+button.go{font-family:'Spectral',serif;font-weight:600;background:var(--gold);color:var(--on);border:0;border-radius:4px;padding:10px 18px;margin-top:12px;cursor:pointer}
+button.go:disabled{opacity:.45;cursor:default}
+.fb{margin-top:14px;padding:12px;border-radius:4px;background:var(--p2);font-size:.92rem;color:var(--dim);display:none}
+.fb b{color:var(--tx)}.fb .pt{font-family:'IBM Plex Mono',monospace;color:var(--gold)}
+.fb .kw{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.75rem;padding:1px 7px;border-radius:99px;margin:2px 3px 2px 0;border:1px solid var(--bd)}
+.kw.h{color:var(--gr);border-color:var(--gr)}.kw.m{color:var(--rd);border-color:var(--rd)}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:.85rem;background:var(--p2);padding:10px;border-radius:4px;display:block;margin-bottom:10px;white-space:pre-wrap}
+.final{display:none;text-align:center;padding:30px;border:1px solid var(--gold);border-radius:6px;margin-top:30px}
+.final h2{margin:0 0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>IN2120 - Øvingsoppgaver, sett 2</h1>
+<button class="chip on" onclick='window.location.href="index.html"'>Gå til sett 1</button>
+<div class="bar"><span class="score" id="score">Poeng: <b>0</b> / 0</span><span id="chips"></span><button class="sm" id="reset">Nullstill</button></div>
+<div id="list"></div>
+<div class="final" id="final"></div>
+</div>
+<script>
+(function(){
+var YN=["Ja","Nei"];
+var Q=[
+{d:"Fysisk sikkerhet",t:"multi",pts:2,q:"Hvordan kan man hindre tyveri av bærbare datamaskiner? Velg alle riktige.",o:["Inventar alle og registrer hos leverandøren","Gravér med identifikasjonsskilt","Sjekk inn den bærbare som bagasje når du flyr","Bruk sporingstjeneste","Krypter sensitive data"],a:[0,1,3,4]},
+{d:"Fysisk sikkerhet",t:"multi",pts:1.5,q:"Hva regnes som sikker sletting? Velg alle riktige.",o:["Kryptering","Overskriving av data","Tømme papirkurven","Destruksjon av lagringsmedia"],a:[0,1,3]},
+{d:"Fysisk sikkerhet",t:"match",pts:1.5,q:"Sikkerhetsmodell:",o:["Skall-/eggmodellen","Lag-/løkmodellen","Zero trust"],r:[["Hardt skall, mykt innhold",0],["Faller ett lag, skal du ha flere igjen",1],["Aldri stol på noen, selv på innsiden",2]]},
+{d:"Fysisk sikkerhet",t:"multi",pts:1.5,q:"Hva er arbeidstakers plikter ifølge HMS? Velg alle riktige.",o:["Bruke verneutstyr","Si ifra om risiko","Stoppe jobb ved fare","Betale for nødvendig opplæring"],a:[0,1,2],e:"Arbeidsgiver er alltid ansvarlig for utstyr og opplæring."},
+{d:"Kryptografi",t:"match",pts:2,q:"DES eller AES?",o:["DES","AES"],r:[["56-bits nøkkel og 64-bits blokk",0],["Designet av Rijmen og Daemen («Rijndael»)",1],["Nøkkel på 128, 192 eller 256 bit; blokk 128 bit",1],["Kunne knekkes med fullstendig nøkkelsøk på 1990-tallet",0]]},
+{d:"Kryptografi",t:"fill",pts:1,q:"Hvem oppfant RSA allerede i 1973, men fikk det hemmeligstemplet? (navn)",a:["clifford cocks","cocks"]},
+{d:"Kryptografi",t:"fill",pts:1,q:"Vernam-chiffer (OTP): M = 0110 og K = 1010. Hva er C = M ⊕ K? (fire bit)",a:["1100"]},
+{d:"Kryptografi",t:"single",pts:1,q:"Hva er hovedproblemet med ren Diffie-Hellman nøkkelutveksling?",o:["Nøkkelen blir for kort","Ingen autentisering, så mann-i-midten-angrep er mulig","Krever symmetrisk kryptering","Gir ikke fremoverhemmelighold"],a:1,e:"Løsning: kombiner med digital signatur (autentisert nøkkelutveksling), slik TLS gjør."},
+{d:"Kryptografi",t:"match",pts:2,q:"Hvordan påvirkes algoritmene av kvantecomputere?",o:["Kan i teorien knekkes","Lite påvirket"],r:[["RSA",0],["Diffie-Hellman",0],["AES",1],["SHA-3",1]],e:"Dobbel nøkkelstørrelse (256 bit) og dobbel hashstørrelse (512 bit) er OK."},
+{d:"Kryptografi",t:"multi",pts:2,q:"Hva brukes hashfunksjoner til? Velg alle riktige.",o:["Sammenligning av filer","Beskyttelse av passord","Dekryptering av meldinger","Meldingsautentiseringskoder (MAC)","HTTP"],a:[0,1,3]},
+{d:"Kryptografi",t:"text",pts:3,q:"Hvorfor bruker man hybrid kryptering i praksis? Maks fem linjer.",kw:[["raskere","fortere","effektiv"],["symmetrisk","symmetriske"],["nøkkeldistribusjon","distribuere","distribusjon"],["asymmetrisk","asymmetriske","offentlig"]],m:"Symmetriske chiffer er mye raskere enn asymmetriske, mens asymmetriske støtter effektiv nøkkeldistribusjon. Derfor distribueres en hemmelig symmetrisk nøkkel med asymmetrisk kryptering, og selve dataene krypteres med symmetrisk chiffer."},
+{d:"PKI og nøkler",t:"single",pts:1,q:"Hvorfor bør en nøkkel bare brukes til én anvendelse?",o:["Det er raskere","Det begrenser skaden hvis nøkkelen kompromitteres, og unngår svekking av andre anvendelser","Det er et lovkrav","Det gir lengre kryptoperiode"],a:1},
+{d:"PKI og nøkler",t:"single",pts:1,q:"Hvordan kan en proxy gjøre TLS-inspeksjon uten at klienten advares?",o:["Den knekker AES","Den utgir seg for tjeneren med et sertifikat signert av en intern CA som klienten stoler på","Den slår av TLS hos tjeneren","Den bruker HSTS"],a:1},
+{d:"Trusler og skadevare",t:"match",pts:2.5,q:"Hvilket nivå av hacker?",o:["Amatør","Cyberkriminell","APT"],r:[["Nysgjerrighet, ideologi, selvhevdelse",0],["Økonomisk gevinst, bestillingsoppdrag",1],["Politisk styrt, langsiktige mål, spionasje",2],["Statlige midler, spesialiserte roller",2],["Få personlige ressurser, gratistjenester og YouTube",0]]},
+{d:"Trusler og skadevare",t:"single",pts:1,q:"Hva er en dimensjonerende aktør?",o:["Den vanligste trusselaktøren","Den farligste trusselaktøren du designer sikkerhetstiltakene for å tåle","Aktøren som har forårsaket flest hendelser","Den billigste aktøren å forsvare seg mot"],a:1,e:"Velger du for lav, er du eksponert mot en mer kapabel motstander enn planlagt."},
+{d:"Trusler og skadevare",t:"match",pts:1.5,q:"Norske statlige aktører:",o:["NSM","PST","Etterretningstjenesten"],r:[["Myndighet for nasjonale sikkerhetshendelser; eier VDI",0],["Ansvar for intern, nasjonal sikkerhet",1],["Etterretning i utlandet; tilgang til tilrettelagt innhenting (TI)",2]]},
+{d:"Trusler og skadevare",t:"text",pts:3,q:"Hva er Cyber Kill Chain, og hvorfor er det best å stoppe et angrep tidlig i kjeden? Maks fem linjer.",kw:[["lockheed martin","modell"],["stegene","trinn","trinnene","kjeden"],["knekke","stoppe","avbryte","pågående"],["tidligere","jo tidligere"]],m:"En modell utviklet av Lockheed Martin som viser stegene en aktør ofte tar før målet nås. «Kill» betyr at man kan stoppe et pågående angrep fra hvert trinn i kjeden, og jo tidligere, desto bedre."},
+{d:"Trusler og skadevare",t:"match",pts:2.5,q:"Hvilken angrepsvektor?",o:["Drop-angrep","Leveransekjedeangrep","Command injection","Downgradeangrep","Man in the middle"],r:[["USB-pinner legges igjen på kafeer",0],["Skadevare i en oppdatering fra leverandør (SolarWinds)",1],["«uio.no && whoami»",2],["Tvinge igjennom ukryptert eller svak kryptering",3],["Angriper setter seg mellom klient og server",4]]},
+{d:"Trusler og skadevare",t:"match",pts:1.5,q:"DDoS-typer:",o:["Volumetrisk","Protokollangrep","Applikasjonslagsangrep"],r:[["Overbelaster båndbredde",0],["Utnytter svakheter i nettverksprotokoller, f.eks. SYN-flood",1],["Overbelaster en spesifikk tjeneste/API",2]]},
+{d:"Trusler og skadevare",t:"fill",pts:1,q:"Hva står TTP for i trusseletterretning? (på engelsk)",a:["tactics techniques procedures","tactics, techniques, procedures","tactics, techniques and procedures","tactics techniques and procedures"]},
+{d:"Pentesting",t:"match",pts:3,q:"Stadiene i en pentest: hvilket nummer i rekkefølgen?",o:["1","2","3","4","5","6","7"],r:[["Planlegge med virksomheten",0],["Rekognosering",1],["Innledende tilgang",2],["Utvide tilgang",3],["Sikre fotfeste",4],["Gevinst",5],["Skrive rapport",6]]},
+{d:"Pentesting",t:"single",pts:1,q:"Legalitetsprinsippet (forenklet): hva gjelder for ansatte i forvaltningen?",o:["Alt er lov som ikke er forbudt","Alt er ulovlig som ikke eksplisitt er tillatt","Alt er lov med skriftlig tillatelse fra kollega","Ingenting er regulert"],a:1},
+{d:"Pentesting",t:"multi",pts:1.5,q:"Hva hindrer boot-angrep (boot fra alternativt OS ved fysisk tilgang)? Velg alle riktige.",o:["Sikker oppstart (UEFI)","Full diskkryptering (f.eks. BitLocker, LUKS)","Sterkt brukerpassord alene","Bytte tastatur"],a:[0,1]},
+{d:"Pentesting",t:"match",pts:2.5,q:"Hvilket verktøy?",o:["nmap","Hydra","Mimikatz","Metasploit","OpenVAS"],r:[["Portscanner",0],["Prøver ordliste med vanlige passord mot innlogging",1],["Dumper klartekst og passordhasher fra maskiner",2],["Rammeverk for utnyttelse av sårbarheter",3],["Sårbarhetskartlegger brukt i kurset",4]]},
+{d:"Pentesting",t:"fill",pts:1,q:"Passordalfabet: 26 store + 26 små + 10 tall + 33 spesialtegn. Hvor mange ulike tegn kan et passord ha?",a:["95"]},
+{d:"Systemsikkerhet",t:"single",pts:1,q:"Hva er en zero-day-sårbarhet?",o:["En sårbarhet oppdaget samme dag den ble introdusert","En sårbarhet leverandøren ikke kjenner til, eller ikke har sikkerhetsoppdatering for","En sårbarhet med CVSS 0","En sårbarhet som er utbedret"],a:1},
+{d:"Systemsikkerhet",t:"match",pts:1.5,q:"Tiltrodd beregning: hvilken teknologi?",o:["UEFI sikker oppstart","TPM","TEE"],r:[["Digitalt signerte oppstartsmoduler; stopper ukjent kode",0],["Målt oppstart, attestering og forsegling av nøkler (BitLocker)",1],["ARM TrustZone, Intel SGX/TDX og AMD SEV",2]]},
+{d:"Systemsikkerhet",t:"multi",pts:1.5,q:"Sikkerhetsmål for virtualisering. Velg alle riktige.",o:["Gjester må ikke kunne påvirke hverandre","Gjester må ikke kunne påvirke hypervisoren","Gjester må kunne oppdage at de er virtualisert","Gjester må ikke kunne detektere at de er virtualisert"],a:[0,1,3]},
+{d:"Systemsikkerhet",t:"fill",pts:1,q:"Hvilket privilegienivå (tall) har hypervisoren?",a:["-1","-1","nivå -1","nivå -1"]},
+{d:"Systemsikkerhet",t:"single",pts:1,q:"Hva er moralen i Spaffords sitat om kryptering og pappkartong/parkbenk?",o:["Kryptering er unødvendig","God kommunikasjonssikkerhet er bortkastet hvis systemsikkerheten er svak","Pansrede biler er for dyre","Parkbenker er sikre"],a:1},
+{d:"Kommunikasjon",t:"fill",pts:1,q:"Hvor mange meldingsrunder (frem og tilbake) minimum trenger TLS 1.3 for å etablere øktnøkkel? (tall)",a:["1","én","en","ett","en runde","1 runde"]},
+{d:"Kommunikasjon",t:"single",pts:1,q:"Hvor konfigureres IPsec?",o:["I hver applikasjon","På OS-nivå, på IP-laget","Bare i nettleseren","På linklaget i svitsjen"],a:1},
+{d:"Kommunikasjon",t:"fill",pts:1,q:"Hvor mange separate krypterte forbindelser, lagt utenpå hverandre, bruker Tor? (tall)",a:["3","tre"]},
+{d:"Kommunikasjon",t:"match",pts:1.5,q:"Brannmurtype:",o:["Tilstandsløs","Tilstandsbasert","Applikasjonsbrannmur"],r:[["Inspiserer bare pakkehoder (pakkefilter)",0],["Har oversikt over tilstanden i hver forbindelse; krever minne",1],["Inspiserer brukerdata og kan fungere som proxy (NGFW)",2]]},
+{d:"Kommunikasjon",t:"match",pts:2.5,q:"Hvilket begrep?",o:["DMZ","VPN","Jumphost","VLAN","NAT"],r:[["Eksponert segment, gjerne mot Internett",0],["Kryptert virtuell tunnel",1],["Logisk, programvarebasert segmentering",3],["Deler én offentlig IP-adresse; ikke en sikkerhetsmekanisme",4]]},
+{d:"Kommunikasjon",t:"match",pts:2,q:"Hvilken inntrengingsløsning?",o:["HIDS","NIDS","IPS","Honeypot"],r:[["Overvåker prosesser og filendringer på verten",0],["Overvåker nettverkstrafikk",1],["Blokkerer automatisk; ofte integrert i NGFW",2],["Falskt, attraktivt mål der all trafikk er illegitim",3]]},
+{d:"Kommunikasjon",t:"match",pts:1.5,q:"Slippes trafikken gjennom (iptables, første treff gjelder)?\n\n1. FORWARD -s 131.234.142.33 -p tcp --dport 22 -j ACCEPT\n2. FORWARD -p tcp -d 10.0.0.56 --dport 22 -j ACCEPT\n3. FORWARD -j DROP",o:YN,r:[["SSH fra 131.234.142.33",0],["TCP port 22 fra 1.1.1.1 til 10.0.0.56",0],["TCP port 22 fra 1.1.1.1 til 10.0.0.99",1],["HTTP fra 131.234.142.33",1]]},
+{d:"Kommunikasjon",t:"text",pts:2,q:"Skriv en Snort-regel som gir alarm for TCP-trafikk fra $HOME_NET (alle porter) til FTP-porten på 10.0.0.56.",kw:[["alert"],["tcp"],["$home_net"],["10.0.0.56"],["21"],["->"]],m:"alert tcp $HOME_NET any -> 10.0.0.56 21 (msg:\"FTP til 10.0.0.56\"; sid:1000001; rev:1;)"},
+{d:"ISMS",t:"match",pts:2,q:"Hvordan er tiltakene kategorisert?",o:["Sikkerhetsfunksjoner (NSM, NIST CSF)","Driftsoperasjoner (CIS Controls, NIST SP 800-53)","Fire domener (ISO/IEC 27002)"],r:[["Organisatoriske, personell-, fysiske og teknologiske tiltak",2],["Identifisere, beskytte, oppdage, håndtere/gjenopprette",0],["F.eks. «Audit and Log Management» og «Data Recovery»",1]]},
+{d:"ISMS",t:"match",pts:1.5,q:"NIST CSF 2.0: hvilket tall?",o:["6","22","106"],r:[["Funksjoner",0],["Kategorier",1],["Underkategorier (subcategories)",2]]},
+{d:"ISMS",t:"text",pts:3,q:"Nevn de fem klassene av digitale verdier i cyberforsvarsmatrisen.",kw:[["enheter"],["apper","applikasjoner"],["nettverk"],["data"],["brukere"]],m:"Enheter, apper, nettverk, data og brukere (kombinert med NIST CSFs fem funksjoner: identifisere, beskytte, oppdage, respondere, gjenopprette)."},
+{d:"Risikostyring",t:"fill",pts:2,q:"Et tiltak har risikoreduksjon $100 000 og koster $40 000. Hva er ROI?",a:["1,5","1.5","150%"]},
+{d:"Risikostyring",t:"match",pts:2.5,q:"Risikomatrisen: hvilket nivå gir kombinasjonen? (kvalitativ P og K; RKval = P + K)",o:["VL (3-4)","M (6)","H (7)","VH (8)","E (9-10)"],r:[["P = 3 Mulig, K = 4 Stor",2],["P = 3 Mulig, K = 3 Betydelig",1],["P = 4 Sannsynlig, K = 4 Stor",3],["P = 5 Snarest, K = 5 Verst",4],["P = 2 Usannsynlig, K = 2 Liten",0]]},
+{d:"Risikostyring",t:"match",pts:2,q:"Hvem bidrar til hva i risikovurderingen?",o:["Eiere av verdier","Brukere og sikkerhetseksperter","Ledelsen","Risikoeksperter"],r:[["Vurderer konsekvens av brudd på sikkerhetsmål",0],["Identifiserer trusler og sårbarheter, vurderer sannsynligheter",1],["Godkjenner budsjett for foreslåtte tiltak",2],["Veileder risikoanalyseprosessen",3]]},
+{d:"Risikostyring",t:"single",pts:1,q:"Beslutningspunkt 1: for stor uvisshet rundt en eller flere høye risikoer. Hva gjør man?",o:["Aksepterer risikoen","Gjør en mer grundig vurdering av disse risikoene","Hever risikoterskelen","Kutter tiltak"],a:1},
+{d:"Risikostyring",t:"multi",pts:2,q:"Risikohåndtering etter ISO/IEC 27005. Velg alle gyldige alternativer.",o:["Risikoreduksjon","Risikooverføring","Risikoaksept","Risikounngåelse","Risikoduplisering"],a:[0,1,2,3]},
+{d:"Autentisering",t:"multi",pts:2,q:"Hva gjelder for tidsbaserte OTP-brikker? Velg alle riktige.",o:["Brikken inneholder en klokke","Den viser en tidsavhengig kode","Klokkene må alltid være synkrone","Koden sendes som SMS"],a:[0,1,2]},
+{d:"Autentisering",t:"fill",pts:1,q:"Hvilket selskap brukte RSA SecurID-brikker og fikk stjålet F-35-planer etter at RSA ble hacket?",a:["lockheed martin","lockheed"]},
+{d:"Autentisering",t:"single",pts:1,q:"Når bør et passord byttes umiddelbart?",o:["Hver måned","Ved mistanke om kompromittering eller hvis kontoen er eksponert (f.eks. haveibeenpwned)","Aldri","Bare når systemet krever det"],a:1},
+{d:"Autentisering",t:"match",pts:2,q:"Hvor lagres passord?",o:["/etc/shadow","SAM-databasen","Active Directory (AD)","Entra ID"],r:[["Linux/Unix",0],["Lokalt i Windows (NTLM-format)",1],["Windows i nettverksmiljø",2],["Online versjon av AD i Azure",3]]},
+{d:"Autentisering",t:"match",pts:1.5,q:"Biometriske operasjonsmoduser:",o:["Registrering","Identifikasjon (1:N)","Autentisering (1:1)"],r:[["Lager en mal som lagres for senere bruk",0],["Søker i hele databasen for et treff",1],["Sammenligner ny prøve med brukerens lagrede mal",2]]},
+{d:"Autentisering",t:"fill",pts:1,q:"Hva kalles det når man lurer et biometrisk system med f.eks. falsk finger eller deepfake? (ett ord)",a:["presentasjonsangrep"]},
+{d:"IAM",t:"match",pts:2,q:"Hva tilhører hvilken fase?",o:["Konfigureringsfase","Bruksfase"],r:[["Registrering av ny bruker-ID",0],["Klargjøring av autentikator(er)",0],["Oppgi bruker-ID og sjekke autentikator",1],["Tilgangskontroll",1]]},
+{d:"IAM",t:"match",pts:2,q:"Identitetsføderering: navnerom og autentisering",o:["Sentralisert navnerom, sentralisert autentisering","Distribuert navnerom, sentralisert autentisering","Sentralisert navnerom, distribuert autentisering","Distribuert navnerom, distribuert autentisering"],r:[["Tysk eID",0],["FEIDE",1],["ID-porten",2],["Google/Facebook-innlogging",3]]},
+{d:"IAM",t:"fill",pts:1,q:"I OAuth-eksempelet med Photo Edit og Google Photos: hva sender Photo Edit til ressurstjeneren som bevis på godkjent forespørsel?",a:["access token","accesstoken","access-token"]},
+{d:"IAM",t:"single",pts:1,q:"Hva er det typiske problemet med RBAC?",o:["Rolle-eksplosjon: svært mange ulike roller","Brukere kan ikke ha roller","Krever sikkerhetsmerking av alle objekter","Fungerer ikke med ACL"],a:0},
+{d:"IAM",t:"match",pts:2,q:"Autentiseringsordninger i e-forvaltning: hvilket garantinivå?",o:["Lavt","Betydelig","Høyt"],r:[["BankID",2],["MinID",1],["Buypass",2],["SMS PIN",0],["Altinn PIN",0]]}
+];
+function sh(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+var done={},pts={},total=0,filter="Alle";
+var list=document.getElementById("list"),sc=document.getElementById("score"),chips=document.getElementById("chips");
+function norm(s){return s.toLowerCase().replace(/[.«»"!?]/g,"").replace(/\s+/g," ").trim()}
+function h(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function fmt(n){return String(Math.round(n*10)/10).replace(".",",")}
+function upd(){var s=0;for(var k in pts)s+=pts[k];sc.innerHTML="Poeng: <b>"+fmt(s)+"</b> / "+fmt(total)+" · besvart "+Object.keys(done).length+"/"+Q.length;
+ var f=document.getElementById("final");if(Object.keys(done).length===Q.length){var p=Math.round(s/total*100);f.style.display="block";f.innerHTML="<h2>"+fmt(s)+" av "+fmt(total)+" poeng ("+p+" %)</h2><p style='color:var(--dim);margin:0'>"+(p>=80?"Sterkt! Du er godt i gang med eksamensformen.":p>=50?"Greit grunnlag - se gjennom forklaringene på det du bommet på.":"Les pensum på nytt og prøv igjen - nullstill øverst.")+"</p>"}else f.style.display="none"}
+function finish(i,card,earned,fbHtml){var q=Q[i];earned=Math.max(0,Math.min(q.pts,earned));pts[i]=earned;done[i]=1;card.classList.add("done");
+ var fb=card.querySelector(".fb");fb.style.display="block";fb.innerHTML="<span class='pt'>"+fmt(earned)+" / "+fmt(q.pts)+" p</span><br>"+fbHtml;
+ card.querySelector("button.go").disabled=true;card.querySelectorAll("select,input,textarea").forEach(function(x){x.disabled=true});upd();if(card._kb){var nx=card.nextElementSibling;while(nx&&nx.style.display==="none")nx=nx.nextElementSibling;if(nx&&nx.classList.contains("card")){var f=nx.querySelector("select,input,textarea");if(f)f.focus({preventScroll:true});nx.scrollIntoView({behavior:"smooth",block:"start"})}}}
+Q.forEach(function(q,i){total+=q.pts;
+ var c=h("div","card");c.dataset.d=q.d;
+ var m=h("div","meta");m.appendChild(h("span",null,"Oppgave "+(i+1)+" · "+q.d));m.appendChild(h("span",null,fmt(q.pts)+" p"));c.appendChild(m);
+ c.appendChild(h("p","q",q.q));
+ var body=h("div"),ctl=[];
+ if(q.t==="match"){q.r.forEach(function(r){var row=h("div","row");row.appendChild(h("span",null,r[0]));var s=h("select");s.appendChild(new Option("Velg…",-1));var ix=q.o.map(function(o,k){return k});(q.o===YN?ix:sh(ix)).forEach(function(k){s.appendChild(new Option(q.o[k],k))});row.appendChild(s);ctl.push([s,row])});sh(ctl.slice()).forEach(function(x){body.appendChild(x[1])})}
+ else if(q.t==="single"||q.t==="multi"){q.o.forEach(function(o,k){var l=h("label","o"),inp=h("input");inp.type=q.t==="single"?"radio":"checkbox";inp.name="q"+i;inp.value=k;l.appendChild(inp);l.appendChild(h("span",null,o));ctl.push([inp,l])});sh(ctl.slice()).forEach(function(x){body.appendChild(x[1])})}
+ else if(q.t==="fill"){var inp=h("input");inp.type="text";inp.placeholder="Svar…";inp.autocomplete="off";body.appendChild(inp);ctl.push([inp])}
+ else{var ta=h("textarea");ta.placeholder="Skriv svaret ditt her…";body.appendChild(ta);ctl.push([ta])}
+ c.appendChild(body);
+ var b=h("button","go","Sjekk svar");c.appendChild(b);c.appendChild(h("div","fb"));
+ b.onclick=function(){var ex=q.e?"<br><b>Forklaring:</b> "+q.e:"",n=0,L=0;
+  if(q.t==="match"){q.r.forEach(function(r,k){var v=+ctl[k][0].value,ok=v===r[1];if(ok)n++;ctl[k][1].classList.add(ok?"ok":"no");if(!ok)ctl[k][1].title="Riktig: "+q.o[r[1]]});
+   var wrong=q.r.filter(function(r,k){return +ctl[k][0].value!==r[1]}).map(function(r){return r[0]+" → <b>"+q.o[r[1]]+"</b>"});
+   finish(i,c,q.pts*n/q.r.length,(wrong.length?"Riktig svar på de du bommet på:<br>"+wrong.join("<br>")+"<br>":"Alt riktig!")+ex)}
+  else if(q.t==="single"){var sel=ctl.filter(function(x){return x[0].checked})[0];if(!sel)return;var ok=+sel[0].value===q.a;ctl.forEach(function(x,k){if(k===q.a)x[1].classList.add("ok");else if(x[0].checked)x[1].classList.add("no")});finish(i,c,ok?q.pts:0,(ok?"Riktig.":"Ikke helt.")+ex)}
+  else if(q.t==="multi"){var good=0,bad=0;ctl.forEach(function(x,k){var should=q.a.indexOf(k)>-1;if(should)x[1].classList.add("ok");if(x[0].checked){if(should)good++;else{bad++;x[1].classList.add("no")}}});
+   finish(i,c,q.pts*Math.max(0,good-bad)/q.a.length,(good===q.a.length&&!bad?"Riktig.":"Grønn = riktig alternativ, rød = feil valg.")+ex)}
+  else if(q.t==="fill"){var v=norm(ctl[0][0].value);if(!v)return;var z=function(x){return norm(x).replace(/[\s$]/g,"")},vv=z(ctl[0][0].value),ok=q.a.some(function(a){return z(a)===vv});finish(i,c,ok?q.pts:0,(ok?"Riktig.":"Riktig svar: <b>"+q.a[0]+"</b>")+ex)}
+  else{var tx=norm(ctl[0][0].value);if(!tx)return;var hits=q.kw.map(function(g){return g.some(function(w){return tx.indexOf(w)>-1})}),nh=hits.filter(Boolean).length;
+   var tags=q.kw.map(function(g,k){return "<span class='kw "+(hits[k]?"h":"m")+"'>"+g[0]+"</span>"}).join("");
+   finish(i,c,Math.round(q.pts*nh/q.kw.length*2)/2,"Nøkkelbegreper (grønn = funnet i svaret ditt, rød = mangler; bruk gjerne synonymer):<br>"+tags+"<br><b>Eksempel på godt svar:</b> "+q.m+"<br><i>Automatisk poengsum er et grovt anslag - vurder selv om svaret ditt dekker innholdet.</i>")}
+ };
+ c.addEventListener("keydown",function(e){if(e.key!=="Enter"||e.target.tagName==="BUTTON"||b.disabled)return;if(e.target.tagName==="TEXTAREA"&&!(e.ctrlKey||e.metaKey))return;e.preventDefault();c._kb=1;b.click()});
+ list.appendChild(c)});
+var ds=["Alle"];Q.forEach(function(q){if(ds.indexOf(q.d)<0)ds.push(q.d)});
+ds.forEach(function(d){var b=h("button","chip"+(d==="Alle"?" on":""),d==="Alle"?"Alle":d.split(":")[0]);b.onclick=function(){filter=d;chips.querySelectorAll(".chip").forEach(function(x){x.classList.remove("on")});b.classList.add("on");list.querySelectorAll(".card").forEach(function(c){c.style.display=(d==="Alle"||c.dataset.d===d)?"":"none"})};chips.appendChild(b);chips.appendChild(document.createTextNode(" "))});
+document.getElementById("reset").onclick=function(){location.reload()};
+upd();
+})();
+</script>
+</body>
+</html>
